@@ -1,0 +1,36 @@
+name: Unique Name Hunter (Strict Choice B)
+
+on:
+  schedule:
+    - cron: '*/40 * * * *'
+  workflow_dispatch:
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run Hunter
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          python hunter.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "UniqueHunterBot"
+          git config --global user.email "bot@uniquehunter.com"
+          git add state.json
+          git commit -m "Update Unique Hunt state [skip ci]" || echo "No changes to commit"
+          git push
